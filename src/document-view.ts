@@ -1,10 +1,9 @@
-import {
-  getFileContents
-} from 'polymer-build/lib/streams';
 import { parse as parseHtml, serialize as serializeDocument } from 'parse5';
 import * as dom from 'dom5';
 import * as File from 'vinyl';
 import { ASTNode } from 'parse5';
+
+import { getFileContents } from './file.js';
 
 const p = dom.predicates;
 
