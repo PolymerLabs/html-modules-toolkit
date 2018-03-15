@@ -1,10 +1,9 @@
-import {
-  getFileContents
-} from 'polymer-build/lib/streams';
 import * as acornBase from 'acorn';
 import * as walk from 'acorn/dist/walk';
 import * as escodegen from 'escodegen';
 import * as File from 'vinyl';
+
+import { getFileContents } from './file.js';
 
 const injectAcornImportMeta = require('acorn-import-meta/inject');
 
