@@ -16,8 +16,12 @@ const moduleScript = p.hasAttrValue('type', 'module');
 const worker = p.hasAttrValue('type', 'worker');
 
 export class DocumentView {
+  static fromSourceString(source: string): DocumentView {
+    return new DocumentView(parseHtml(source));
+  }
+
   static async fromFile(file: File): Promise<DocumentView> {
-    return new DocumentView(parseHtml(await getFileContents(file)));
+    return this.fromSourceString(await getFileContents(file));
   }
 
   constructor(public document: ASTNode) {}

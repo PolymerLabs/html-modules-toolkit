@@ -1,6 +1,7 @@
 import * as File from 'vinyl';
 import * as dom from 'dom5';
 
+import { getFileContents } from './file.js';
 import { transformStream } from './stream.js';
 import { DocumentView } from './document-view.js';
 import { ScriptView } from './script-view.js';
@@ -20,7 +21,29 @@ export const htmlModuleSpecifierTransform =
 
 export const transformSpecifiersInHtmlFile =
     async (file: File): Promise<File> => {
-      const documentView = await DocumentView.fromFile(file);
+      const htmlString = transformSpecifiersInHtmlString(
+          await getFileContents(file));
+
+      file.contents = Buffer.from(htmlString);
+
+      return file;
+    };
+
+
+export const transformSpecifiersInJsFile =
+    async (file: File): Promise<File> => {
+      const jsString = transformSpecifiersInJsString(
+          await getFileContents(file));
+
+      file.contents = Buffer.from(jsString);
+
+      return file;
+    };
+
+
+export const transformSpecifiersInHtmlString =
+    (htmlString: string): string => {
+      const documentView = DocumentView.fromSourceString(htmlString);
       const {
         inlineModuleScripts,
         externalModuleScripts
@@ -34,33 +57,18 @@ export const transformSpecifiersInHtmlFile =
       }
 
       for (const script of inlineModuleScripts) {
-        const scriptView = ScriptView.fromSourceString(
+        const jsString = transformSpecifiersInJsString(
             dom.getTextContent(script));
 
-        transformSpecifiersInScriptView(scriptView);
-
-        dom.setTextContent(script, scriptView.toString());
+        dom.setTextContent(script, jsString);
       }
 
-      file.contents = Buffer.from(documentView.toString());
-
-      return file;
-    };
+      return documentView.toString();
+    };;
 
 
-export const transformSpecifiersInJsFile =
-    async (file: File): Promise<File> => {
-      const scriptView = await ScriptView.fromFile(file);
-
-      transformSpecifiersInScriptView(scriptView);
-
-      file.contents = Buffer.from(scriptView.toString());
-
-      return file;
-    };
-
-
-export const transformSpecifiersInScriptView = (scriptView: ScriptView) => {
+export const transformSpecifiersInJsString = (jsString: string): string => {
+  const scriptView = ScriptView.fromSourceString(jsString);
   const { importDeclarations } = scriptView;
 
   for (const declaration of importDeclarations) {
@@ -70,5 +78,7 @@ export const transformSpecifiersInScriptView = (scriptView: ScriptView) => {
       source.raw = source.raw.replace(/\.html$/, '.html.js');
     }
   }
+
+  return scriptView.toString();
 };
 
