@@ -15,6 +15,7 @@
     "acorn-import-meta": "^0.2.1",
     "dom5": "^3.0.0",
     "escodegen": "^1.9.1",
+    "express": "^4.16.3",
     "parse5": "^4.0.0",
     "through2": "^2.0.3",
     "vinyl-fs": "^3.0.2",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/acorn": "^4.0.3",
     "@types/escodegen": "0.0.6",
+    "@types/express": "^4.11.1",
     "@types/through2": "^2.0.33",
     "@types/vinyl": "^2.0.2",
     "@types/vinyl-fs": "^2.4.8",

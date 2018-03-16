@@ -22,8 +22,8 @@ import { DocumentView } from './document-view.js';
 import { ScriptView } from './script-view.js';
 
 
-export const htmlModuleSpecifierTransform =
-    () => transformStream<File, File>(async (file: File): Promise<File> => {
+export const htmlModuleSpecifierTransform = (): Transform =>
+    transformStream<File, File>(async (file: File): Promise<File> => {
       if (/.html$/.test(file.path)) {
         return await transformSpecifiersInHtmlFile(file);
       } else if (/.js$/.test(file.path)) {

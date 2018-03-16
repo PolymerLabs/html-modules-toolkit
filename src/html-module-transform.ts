@@ -1,18 +1,33 @@
+/**
+ * @license
+ * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+
 import * as File from 'vinyl';
 import * as dom from 'dom5';
+import { Transform } from 'stream';
 
 import { destructureStream } from './stream.js';
 import { DocumentView } from './document-view.js';
 import { ScriptView } from './script-view.js';
 import * as nodePath from 'path';
 
-export type HtmlModuleTestFunction = (file: File) => Boolean;
+export type HtmlModuleFileTest = (file: File) => Boolean;
 
-export const defaultHtmlModuleTest: HtmlModuleTestFunction = (file: File) =>
+export const defaultHtmlModuleTest: HtmlModuleFileTest = (file: File) =>
     /\.html$/.test(file.path) && !/index\.html$/.test(file.path);
 
 export const htmlModuleTransform =
-    (htmlModuleTest: HtmlModuleTestFunction = defaultHtmlModuleTest) =>
+    (htmlModuleTest: HtmlModuleFileTest = defaultHtmlModuleTest): Transform =>
         destructureStream<File>(async (file: File): Promise<File[]> =>
             htmlModuleTest(file)
                 ? await htmlModuleFileToJsModuleFiles(file)
