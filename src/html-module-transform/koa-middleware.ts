@@ -13,20 +13,21 @@
  */
 
 import * as File from 'vinyl';
-import { Request, Response, RequestHandler } from 'express';
+import * as Koa from 'koa';
 
 import { SyntheticFileMap } from '../file.js';
 import { htmlModuleTransform } from '../html-module-transform.js';
 
-export const htmlModulesMiddleware = (root: string = './'): RequestHandler => {
+export const htmlModuleMiddleware = (root: string = './'): Koa.Middleware => {
 
   const syntheticFileMap = new SyntheticFileMap(root,
       htmlModuleTransform((_file: File) => true));
 
-  return async (request: Request, response: Response, next: () => void) => {
+  return async (ctx: Koa.Context, next: Function) => {
+    const { request, response } = ctx;
     const { path } = request;
     const hasFile = await syntheticFileMap.hasFile(path);
-    // NOTE(cdata): This is not really a good test:
+
     const isHtmlModule = /\.html$/.test(path) && !/index\.html$/.test(path);
 
     if (!hasFile || !isHtmlModule) {
@@ -43,7 +44,8 @@ export const htmlModulesMiddleware = (root: string = './'): RequestHandler => {
 
     response.set('Content-Type', 'text/javascript');
     response.set('Cache-Control', 'no-store');
-    response.send(file.contents);
+    response.body = file.contents;
+
+    next();
   };
 };
-

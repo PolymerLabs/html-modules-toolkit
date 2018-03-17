@@ -13,6 +13,14 @@
  */
 
 import * as File from 'vinyl';
+import * as vfs from 'vinyl-fs';
+import * as nodePath from 'path';
+import * as fs from 'fs';
+import { promisify } from 'util';
+import { Transform } from 'stream';
+
+const stat = promisify(fs.stat);
+
 
 /**
  * Returns the string contents of a Vinyl File object, waiting for
@@ -41,3 +49,85 @@ export async function getFileContents(file: File): Promise<string> {
       `It has neither a buffer nor a stream.`);
 };
 
+
+export class SyntheticFileMap {
+  protected fileMap: Map<string, File> = new Map();
+  protected watcher: fs.FSWatcher | null = null;
+
+  constructor(readonly basePath: string, protected transform: Transform) {
+    this.watchFilesystem();
+  }
+
+  watchFilesystem() {
+    if (this.watcher != null) {
+      return;
+    }
+
+    this.watcher = fs.watch(this.basePath, {
+      recursive: true,
+      persistent: false
+    }, (eventType: string, filename: string) =>
+        this.onFsEvent(eventType, filename));
+  }
+
+  stopWatchingFilesystem() {
+    if (this.watcher == null) {
+      return;
+    }
+
+    this.watcher.close();
+  }
+
+  async hasFile(path: string): Promise<boolean> {
+    const filePath = this.mappedPath(path);
+
+    if (this.fileMap.has(filePath)) {
+      return true;
+    }
+
+    try {
+      const stats = await stat(filePath);
+
+      if (!stats.isDirectory()) {
+        return true;
+      }
+    } catch (e) {}
+
+    return false;
+  }
+
+  async readFile(path: string): Promise<File> {
+    const filePath = this.mappedPath(path);
+
+    if (this.fileMap.has(filePath)) {
+      return this.fileMap.get(filePath);
+    }
+
+    return await new Promise<File>((resolve, reject) => {
+      vfs.src([filePath])
+          .pipe(this.transform)
+          .on('data', (file: File) => {
+            // NOTE(cdata): A transform may emit more than one file here, as is
+            // the case for HTML Modules => JS Modules
+            this.fileMap.set(file.path, file);
+          })
+          .on('end', () => {
+            if (this.fileMap.has(filePath)) {
+              resolve(this.fileMap.get(filePath));
+            } else {
+              reject(new Error('Not found!'));
+            }
+          });
+    });
+  }
+
+  private mappedPath(path: string): string {
+    return nodePath.join(this.basePath, path);
+  }
+
+  private onFsEvent(_eventType: string, filePath: string): void {
+    if (this.fileMap.has(filePath)) {
+      this.fileMap.delete(filePath);
+    }
+  }
+}
