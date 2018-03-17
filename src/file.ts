@@ -54,7 +54,7 @@ export class SyntheticFileMap {
   protected fileMap: Map<string, File> = new Map();
   protected watcher: fs.FSWatcher | null = null;
 
-  constructor(readonly basePath: string, protected transform: Transform) {
+  constructor(readonly basePath: string, protected makeTransform: () => Transform) {
     this.watchFilesystem();
   }
 
@@ -104,12 +104,26 @@ export class SyntheticFileMap {
     }
 
     return await new Promise<File>((resolve, reject) => {
+      const originalFilename = nodePath.basename(filePath);
+
       vfs.src([filePath])
-          .pipe(this.transform)
+          .pipe(this.makeTransform())
+          .on('error', (error) => {
+            console.error(error);
+            reject(error);
+          })
           .on('data', (file: File) => {
+            const newFilename = nodePath.basename(file.path);
+            // The new filename of the original module will have `.js` appended
+            // if it originally ended in `.html`. Newly generated files can be
+            // referenced by their suggested paths.
+            const storedName = newFilename === `${originalFilename}.js`
+                ? filePath
+                : file.path;
+
             // NOTE(cdata): A transform may emit more than one file here, as is
             // the case for HTML Modules => JS Modules
-            this.fileMap.set(file.path, file);
+            this.fileMap.set(storedName, file);
           })
           .on('end', () => {
             if (this.fileMap.has(filePath)) {
@@ -122,10 +136,12 @@ export class SyntheticFileMap {
   }
 
   private mappedPath(path: string): string {
-    return nodePath.join(this.basePath, path);
+    return nodePath.resolve(nodePath.join(this.basePath, path));
   }
 
-  private onFsEvent(_eventType: string, filePath: string): void {
+  private onFsEvent(_eventType: string, path: string): void {
+    const filePath = this.mappedPath(path);
+
     if (this.fileMap.has(filePath)) {
       this.fileMap.delete(filePath);
     }

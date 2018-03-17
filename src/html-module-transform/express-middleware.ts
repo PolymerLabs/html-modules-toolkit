@@ -20,24 +20,24 @@ import { htmlModuleTransform } from '../html-module-transform.js';
 
 export const htmlModulesMiddleware = (root: string = './'): RequestHandler => {
 
-  const syntheticFileMap = new SyntheticFileMap(root,
-      htmlModuleTransform((_file: File) => true));
+  const syntheticFileMap =
+      new SyntheticFileMap(root, () => htmlModuleTransform());
 
   return async (request: Request, response: Response, next: () => void) => {
     const { path } = request;
     const hasFile = await syntheticFileMap.hasFile(path);
-    // NOTE(cdata): This is not really a good test:
-    const isHtmlModule = /\.html$/.test(path) && !/index\.html$/.test(path);
 
-    if (!hasFile || !isHtmlModule) {
+    if (!hasFile) {
       return next();
     }
 
     let file: File;
 
     try {
+      console.log('Pulling out of file map...');
       file = await syntheticFileMap.readFile(path);
     } catch (e) {
+      console.error(e);
       return next();
     }
 

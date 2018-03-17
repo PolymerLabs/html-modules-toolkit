@@ -13,24 +13,22 @@
  */
 
 import * as File from 'vinyl';
-import * as Koa from 'koa';
+import { Context, Middleware } from 'koa';
 
 import { SyntheticFileMap } from '../file.js';
 import { htmlModuleTransform } from '../html-module-transform.js';
 
-export const htmlModuleMiddleware = (root: string = './'): Koa.Middleware => {
+export const htmlModulesMiddleware = (root: string = './'): Middleware => {
 
-  const syntheticFileMap = new SyntheticFileMap(root,
-      htmlModuleTransform((_file: File) => true));
+  const syntheticFileMap =
+      new SyntheticFileMap(root, () => htmlModuleTransform());
 
-  return async (ctx: Koa.Context, next: Function) => {
+  return async (ctx: Context, next: Function) => {
     const { request, response } = ctx;
     const { path } = request;
     const hasFile = await syntheticFileMap.hasFile(path);
 
-    const isHtmlModule = /\.html$/.test(path) && !/index\.html$/.test(path);
-
-    if (!hasFile || !isHtmlModule) {
+    if (!hasFile) {
       return next();
     }
 
