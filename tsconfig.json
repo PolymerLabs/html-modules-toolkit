@@ -15,13 +15,14 @@
     "removeComments": false,
     "preserveConstEnums": true,
     "suppressImplicitAnyIndexErrors": false,
+    "sourceMap": true,
     "strict": true,
     "strictNullChecks": false,
     "outDir": "lib",
     "rootDir": "src"
   },
   "include": [
-    "custom_typings/**/*.ts",
+    "custom-types/**/*.ts",
     "src/**/*"
   ]
 }

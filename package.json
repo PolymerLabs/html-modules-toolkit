@@ -1,11 +1,14 @@
 {
-  "name": "@polymer/hd-html",
+  "name": "hd-html",
   "version": "0.0.1",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "files": ["lib"],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prepublishOnly": "npm run build"
   },
   "author": "The Polymer Authors",
   "license": "BSD-3-Clause",
