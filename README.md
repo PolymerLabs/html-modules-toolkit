@@ -14,7 +14,7 @@ that we still use it for so many things today. The next generation of web
 content will need to take advantage of a new generation of HTML capabilities.
 HD HTML is a collection of tools and libraries to help web authors write their
 apps and content the way they were meant to be written: in highly declarative
-HTML. HD HTML unlocks the potential of future HTML standards for today.
+HTML. HD HTML unlocks the potential of future HTML standards for the projects of today.
 
 ## HTML Modules
 
