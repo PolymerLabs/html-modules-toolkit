@@ -1,12 +1,10 @@
 # 📺 HD HTML
 
-HD HTML is a collection of tools and libraries to help web authors write their
-apps and content the way they were meant to be written: in highly declarative
-HTML.
-
 HTML has been around for a long time. I mean, sure, just a few decades. But
 that's like a million software years. It is a testament to HTML's versatility
-that we still use it for so many things today.
+that we still use it for so many things today. HD HTML is a collection of tools
+and libraries to help web authors write their apps and content the way they
+were meant to be written: in highly declarative HTML.
 
 Let's face it though: if you publish stuff on the web, you probably noticed that
 it is getting harder and harder to use HTML to do it. HTML Imports failed to
@@ -15,7 +13,7 @@ JavaScript; you can use cool tools like
 [`lit-html`](https://github.com/polymerlabs/lit-html) within JavaScript, but
 traditional markup just isn't on the menu. Until now...
 
-### HTML Modules
+## HTML Modules
 
 There is a nascent standard proposal called
 [HTML Modules](https://github.com/w3c/webcomponents/issues/645) that could
@@ -27,7 +25,7 @@ browser implementors than HTML Imports ever did.
 HTML Modules aren't standardized yet, but we have a good sense of what they
 might look like once they are standard and implemented by browsers.
 
-### Future HTML Today
+## Future HTML Today
 
 HD HTML intends to support workflows that incorporate future HTML standards like
 HTML Modules. Today, this project includes transforms for incorporating HTML
