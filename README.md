@@ -28,7 +28,7 @@ interest from browser implementors than HTML Imports ever did.
 HTML Modules aren't standardized yet, but we have a good sense of what they
 might look like once they are standard and implemented by browsers.
 
-## Future HTML Today
+## Future HTML today
 
 HD HTML intends to support workflows that incorporate future HTML standards like
 HTML Modules. Today, this project includes transforms for incorporating HTML
