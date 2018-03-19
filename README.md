@@ -55,6 +55,9 @@ of this project. The examples include:
  - [A Koa dev server](https://github.com/PolymerLabs/hd-html/blob/master/test/serve-koa.js)
  - [A vinyl-fs (Gulp) static build pipeline](https://github.com/PolymerLabs/hd-html/blob/master/test/build.js)
 
+Additionally, you can find a live example of the Koa middleware in action on
+[Glitch](https://glitch.com/edit/#!/html-modules).
+
 ## Contributing
 
 Currently we are only considering features or bugfixes related to the evolving
