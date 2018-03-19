@@ -1,0 +1,39 @@
+{
+  "name": "hd-html",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "files": ["lib"],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prepublishOnly": "npm run build"
+  },
+  "author": "The Polymer Authors",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "@types/node": "^9.4.7",
+    "acorn": "^5.5.3",
+    "acorn-import-meta": "^0.2.1",
+    "dom5": "^3.0.0",
+    "escodegen": "^1.9.1",
+    "express": "^4.16.3",
+    "koa": "^2.5.0",
+    "parse5": "^4.0.0",
+    "through2": "^2.0.3",
+    "vinyl-fs": "^3.0.2",
+    "vinyl-source-stream": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/acorn": "^4.0.3",
+    "@types/escodegen": "0.0.6",
+    "@types/express": "^4.11.1",
+    "@types/koa": "^2.0.44",
+    "@types/through2": "^2.0.33",
+    "@types/vinyl": "^2.0.2",
+    "@types/vinyl-fs": "^2.4.8",
+    "koa-static": "^4.0.2",
+    "typescript": "^2.7.2"
+  }
+}

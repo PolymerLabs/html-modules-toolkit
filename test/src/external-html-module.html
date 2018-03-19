@@ -1,0 +1,10 @@
+<script type="module" src="./external-js-module.js"></script>
+<script type="module">
+  import './external-js-module.js';
+</script>
+<template>
+  <div>Hi!</div>
+</template>
+<script type="module" id="foo">
+  console.log('Sup', import.meta.scriptElement.id);
+</script>

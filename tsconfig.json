@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "lib": [
+      "es2016",
+      "esnext.asynciterable"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "isolatedModules": false,
+    "declaration": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "suppressImplicitAnyIndexErrors": false,
+    "sourceMap": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": [
+    "custom-types/**/*.ts",
+    "src/**/*"
+  ]
+}
