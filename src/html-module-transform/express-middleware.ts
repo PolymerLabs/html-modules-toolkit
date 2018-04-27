@@ -12,19 +12,18 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
+import {Request, RequestHandler, Response} from 'express';
 import * as File from 'vinyl';
-import { Request, Response, RequestHandler } from 'express';
 
-import { SyntheticFileMap } from '../file.js';
-import { htmlModuleTransform } from '../html-module-transform.js';
+import {SyntheticFileMap} from '../file.js';
+import {htmlModuleTransform} from '../html-module-transform.js';
 
 export const htmlModulesMiddleware = (root: string = './'): RequestHandler => {
-
   const syntheticFileMap =
       new SyntheticFileMap(root, () => htmlModuleTransform());
 
   return async (request: Request, response: Response, next: () => void) => {
-    const { path } = request;
+    const {path} = request;
     const hasFile = await syntheticFileMap.hasFile(path);
 
     if (!hasFile) {
@@ -46,4 +45,3 @@ export const htmlModulesMiddleware = (root: string = './'): RequestHandler => {
     response.send(file.contents);
   };
 };
-

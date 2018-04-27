@@ -17,15 +17,13 @@ import * as walk from 'acorn/dist/walk';
 import * as escodegen from 'escodegen';
 import * as File from 'vinyl';
 
-import { getFileContents } from './file.js';
+import {getFileContents} from './file.js';
 
 const injectAcornImportMeta = require('acorn-import-meta/inject');
 
 const acorn = injectAcornImportMeta(acornBase);
 
-const {
-  parse: parseJs
-} = acorn;
+const {parse: parseJs} = acorn;
 const serializeJs = escodegen.generate;
 
 const $verbatim = Symbol('verbatim');
@@ -40,9 +38,7 @@ export class ScriptView {
       sourceType: 'module',
       ecmaVersion: 9,
       allowImportExportEverywhere: true,
-      plugins: {
-        importMeta: true
-      }
+      plugins: {importMeta: true}
     }));
   }
 
@@ -76,9 +72,6 @@ export class ScriptView {
   }
 
   toString() {
-    return serializeJs(this.script, <any>{
-      verbatim: $verbatim
-    });
+    return serializeJs(this.script, <any>{verbatim: $verbatim});
   }
 };
-

@@ -1,5 +1,4 @@
-# 📺 HD HTML
-
+# 🍢 HTML Modules Toolkit
 
 Let's face it: if you publish stuff on the web, you probably noticed that
 it is getting harder and harder to use HTML to do it. HTML Imports failed to
@@ -12,9 +11,10 @@ HTML has been around for a long time. I mean, sure, just a few decades. But,
 that's like a million software years. It is a testament to HTML's versatility
 that we still use it for so many things today. The next generation of web
 content will need to take advantage of a new generation of HTML capabilities.
-HD HTML is a collection of tools and libraries to help web authors write their
-apps and content the way they were meant to be written: in highly declarative
-HTML. HD HTML unlocks the potential of future HTML standards for the projects of today.
+HTML Modules Toolkit is a collection of tools and libraries to help web authors
+write their apps and content the way they were meant to be written: in highly
+declarative HTML. HTML Modules Toolkit unlocks the potential of future HTML
+standards for the projects of today.
 
 ## HTML Modules
 
@@ -30,10 +30,10 @@ might look like once they are standard and implemented by browsers.
 
 ## Future HTML today
 
-HD HTML intends to support workflows that incorporate future HTML standards like
-HTML Modules. Today, this project includes transforms for incorporating HTML
-Modules into build pipelines, and also middleware for using HTML Modules
-seamlessly inside of a dev server.
+HTML Modules Toolkit intends to support workflows that incorporate future HTML
+standards like HTML Modules. Today, this project includes transforms for
+incorporating HTML Modules into build pipelines, and also middleware for using
+HTML Modules seamlessly inside of a dev server.
 
 The standards that this project builds upon are still at a very early stage,
 so these tools should be considered to be in a similar state. We will adapt and

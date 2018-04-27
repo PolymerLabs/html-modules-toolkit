@@ -12,12 +12,12 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
+import * as fs from 'fs';
+import * as nodePath from 'path';
+import {Transform} from 'stream';
+import {promisify} from 'util';
 import * as File from 'vinyl';
 import * as vfs from 'vinyl-fs';
-import * as nodePath from 'path';
-import * as fs from 'fs';
-import { promisify } from 'util';
-import { Transform } from 'stream';
 
 const stat = promisify(fs.stat);
 
@@ -52,9 +52,11 @@ export async function getFileContents(file: File): Promise<string> {
 
 export class SyntheticFileMap {
   protected fileMap: Map<string, File> = new Map();
-  protected watcher: fs.FSWatcher | null = null;
+  protected watcher: fs.FSWatcher|null = null;
 
-  constructor(readonly basePath: string, protected makeTransform: () => Transform) {
+  constructor(
+      readonly basePath: string,
+      protected makeTransform: () => Transform) {
     this.watchFilesystem();
   }
 
@@ -63,11 +65,11 @@ export class SyntheticFileMap {
       return;
     }
 
-    this.watcher = fs.watch(this.basePath, {
-      recursive: true,
-      persistent: false
-    }, (eventType: string, filename: string) =>
-        this.onFsEvent(eventType, filename));
+    this.watcher = fs.watch(
+        this.basePath,
+        {recursive: true, persistent: false},
+        (eventType: string, filename: string) =>
+            this.onFsEvent(eventType, filename));
   }
 
   stopWatchingFilesystem() {
@@ -91,7 +93,8 @@ export class SyntheticFileMap {
       if (!stats.isDirectory()) {
         return true;
       }
-    } catch (e) {}
+    } catch (e) {
+    }
 
     return false;
   }
@@ -108,23 +111,25 @@ export class SyntheticFileMap {
 
       vfs.src([filePath])
           .pipe(this.makeTransform())
-          .on('error', (error) => {
-            console.error(error);
-            reject(error);
-          })
-          .on('data', (file: File) => {
-            const newFilename = nodePath.basename(file.path);
-            // The new filename of the original module will have `.js` appended
-            // if it originally ended in `.html`. Newly generated files can be
-            // referenced by their suggested paths.
-            const storedName = newFilename === `${originalFilename}.js`
-                ? filePath
-                : file.path;
+          .on('error',
+              (error) => {
+                console.error(error);
+                reject(error);
+              })
+          .on('data',
+              (file: File) => {
+                const newFilename = nodePath.basename(file.path);
+                // The new filename of the original module will have `.js`
+                // appended if it originally ended in `.html`. Newly generated
+                // files can be referenced by their suggested paths.
+                const storedName = newFilename === `${originalFilename}.js` ?
+                    filePath :
+                    file.path;
 
-            // NOTE(cdata): A transform may emit more than one file here, as is
-            // the case for HTML Modules => JS Modules
-            this.fileMap.set(storedName, file);
-          })
+                // NOTE(cdata): A transform may emit more than one file here, as
+                // is the case for HTML Modules => JS Modules
+                this.fileMap.set(storedName, file);
+              })
           .on('end', () => {
             if (this.fileMap.has(filePath)) {
               resolve(this.fileMap.get(filePath));
