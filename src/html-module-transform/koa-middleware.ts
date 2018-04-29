@@ -12,20 +12,19 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
+import {Context, Middleware} from 'koa';
 import * as File from 'vinyl';
-import { Context, Middleware } from 'koa';
 
-import { SyntheticFileMap } from '../file.js';
-import { htmlModuleTransform } from '../html-module-transform.js';
+import {SyntheticFileMap} from '../file.js';
+import {htmlModuleTransform} from '../html-module-transform.js';
 
 export const htmlModulesMiddleware = (root: string = './'): Middleware => {
-
   const syntheticFileMap =
       new SyntheticFileMap(root, () => htmlModuleTransform());
 
   return async (ctx: Context, next: Function) => {
-    const { request, response } = ctx;
-    const { path } = request;
+    const {request, response} = ctx;
+    const {path} = request;
     const hasFile = await syntheticFileMap.hasFile(path);
 
     if (!hasFile) {
