@@ -21,7 +21,6 @@ import {getFileContents} from './file.js';
 import {ScriptView} from './script-view.js';
 import {transformStream} from './stream.js';
 
-
 export const htmlModuleSpecifierTransform = (): Transform =>
     transformStream<File, File>(async(file: File): Promise<File> => {
       if (/.html$/.test(file.path)) {
@@ -78,13 +77,15 @@ export const transformSpecifiersInHtmlString = (htmlString: string): string => {
 
 export const transformSpecifiersInJsString = (jsString: string): string => {
   const scriptView = ScriptView.fromSourceString(jsString);
-  const {importDeclarations} = scriptView;
+  const {specifierNodes} = scriptView;
 
-  for (const declaration of importDeclarations) {
-    const {source} = declaration;
-    if (/.html$/.test(source.value)) {
+  for (const specifier of specifierNodes) {
+    const {node} = specifier;
+    const {source} = node as any;
+    const {value} = source;
+
+    if (/.html$/.test(value)) {
       source.value = source.value.replace(/\.html$/, '.html.js');
-      source.raw = source.raw.replace(/\.html$/, '.html.js');
     }
   }
 

@@ -12,14 +12,17 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import * as File from 'vinyl';
 import * as dom from 'dom5';
-import { Transform } from 'stream';
-
-import { destructureStream } from './stream.js';
-import { DocumentView } from './document-view.js';
-import { ScriptView } from './script-view.js';
 import * as nodePath from 'path';
+import {Transform} from 'stream';
+import * as File from 'vinyl';
+import template from '@babel/template';
+
+import {DocumentView} from './document-view.js';
+import {ScriptView} from './script-view.js';
+import {destructureStream} from './stream.js';
+
+const {ast} = template;
 
 export type HtmlModuleFileTest = (file: File) => Boolean;
 
@@ -28,17 +31,15 @@ export const defaultHtmlModuleTest: HtmlModuleFileTest = (file: File) =>
 
 export const htmlModuleTransform =
     (htmlModuleTest: HtmlModuleFileTest = defaultHtmlModuleTest): Transform =>
-        destructureStream<File>(async (file: File): Promise<File[]> =>
-            htmlModuleTest(file)
-                ? await htmlModuleFileToJsModuleFiles(file)
-                : [file]);
+        destructureStream<File>(
+            async(file: File): Promise<File[]> => htmlModuleTest(file) ?
+                await htmlModuleFileToJsModuleFiles(file) :
+                [file]);
 
-export const htmlModuleFileToJsModuleFiles = async (file: File): Promise<File[]> => {
+export const htmlModuleFileToJsModuleFiles =
+    async(file: File): Promise<File[]> => {
   const documentView = await DocumentView.fromFile(file);
-  const {
-    inlineModuleScripts,
-    externalModuleScripts
-  } = documentView;
+  const {inlineModuleScripts, externalModuleScripts} = documentView;
   const externalizedModuleScriptSpecifiers: string[] = [];
   const newFiles: File[] = [file];
   const documentModuleSpecifier =
@@ -46,23 +47,25 @@ export const htmlModuleFileToJsModuleFiles = async (file: File): Promise<File[]>
 
   for (const script of inlineModuleScripts) {
     const index = externalizedModuleScriptSpecifiers.length;
-    const specifier = `./${nodePath.basename(file.path)}$inline-module-${
-        index}.js`;
+    const specifier =
+        `./${nodePath.basename(file.path)}$inline-module-${index}.js`;
 
     const scriptView = ScriptView.fromSourceString(dom.getTextContent(script));
 
-    const {
-      importMetaScriptElementExpressions
-    } = scriptView;
+    const {importMetaMemberExpressions} = scriptView;
 
-    const importMetaScriptElementVerbatim =
-        `$documentModule.querySelector('script[data-inline-module-script="${
-            index}"]')`;
-
+    const importMetaScriptElementSelector =
+        `'script[data-inline-module-script="${index}"]'`;
     dom.setAttribute(script, 'data-inline-module-script', `${index}`);
 
-    for (const expression of importMetaScriptElementExpressions) {
-      expression[ScriptView.$verbatim] = importMetaScriptElementVerbatim;
+    for (const memberExpression of importMetaMemberExpressions) {
+      const {node} = memberExpression;
+      const {property} = node;
+
+      if (property.type === 'Identifier') {
+        memberExpression.replaceWith(ast`($documentModule.querySelector(${
+            importMetaScriptElementSelector}))`);
+      }
     }
 
     const source = `import $documentModule from '${documentModuleSpecifier}';
@@ -84,7 +87,7 @@ const template = document.createElement('template');
 const doc = document.implementation.createHTMLDocument();
 
 template.innerHTML = \`${
-  documentView.toString().replace(/(^|[^\\]*)\`/g, '$1\\`')}\`;
+        documentView.toString().replace(/(^|[^\\]*)\`/g, '$1\\`')}\`;
 
 doc.body.appendChild(template.content);
 
@@ -95,16 +98,20 @@ export default doc;`),
 
   newFiles.push(documentModuleFile);
 
-  const scriptUrls = externalModuleScripts
-      .map(script => dom.getAttribute(script, 'src'))
-      .concat(externalizedModuleScriptSpecifiers);
+  const scriptUrls =
+      externalModuleScripts.map(script => dom.getAttribute(script, 'src'))
+          .concat(externalizedModuleScriptSpecifiers);
 
   file.path = `${file.path}.js`;
   file.contents = Buffer.from(`
 import doc from '${documentModuleSpecifier}';
-${scriptUrls.map((url, index) => `import * as module${index} from '${url}';`).join('\n')}
+${
+      scriptUrls
+          .map((url, index) => `import * as module${index} from '${url}';`)
+          .join('\n')}
 
-const modules = [${scriptUrls.map((_url, index) => `module${index}`).join(', ')}];
+const modules = [${
+      scriptUrls.map((_url, index) => `module${index}`).join(', ')}];
 
 const scripts = doc.querySelectorAll('script[type="module"]');
 
@@ -116,4 +123,3 @@ export default doc;`);
 
   return newFiles;
 };
-
