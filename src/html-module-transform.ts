@@ -21,6 +21,7 @@ import template from '@babel/template';
 import {DocumentView} from './document-view.js';
 import {ScriptView} from './script-view.js';
 import {destructureStream} from './stream.js';
+import {getFileContents} from './file.js';
 
 const {ast} = template;
 
@@ -36,82 +37,77 @@ export const htmlModuleTransform =
                 await htmlModuleFileToJsModuleFiles(file) :
                 [file]);
 
-export const htmlModuleFileToJsModuleFiles =
-    async(file: File): Promise<File[]> => {
-  const documentView = await DocumentView.fromFile(file);
-  const {inlineModuleScripts, externalModuleScripts} = documentView;
-  const externalizedModuleScriptSpecifiers: string[] = [];
-  const newFiles: File[] = [file];
-  const documentModuleSpecifier =
-      `./${nodePath.basename(file.path)}$document-module.js`;
+export type JsModuleMap = Map<string, string>;
 
-  for (const script of inlineModuleScripts) {
-    const index = externalizedModuleScriptSpecifiers.length;
-    const specifier =
-        `./${nodePath.basename(file.path)}$inline-module-${index}.js`;
+export const htmlModuleToJsModuleMap = async(path: string, source: string):
+    Promise<JsModuleMap> => {
+      const documentView = await DocumentView.fromSourceString(source);
+      const {inlineModuleScripts, externalModuleScripts} = documentView;
+      const externalizedModuleScriptSpecifiers: string[] = [];
+      const fileMap = new Map<string, string>();
+      const filename = nodePath.basename(path);
+      const directory = nodePath.dirname(path);
 
-    const scriptView = ScriptView.fromSourceString(dom.getTextContent(script));
+      const documentModuleSpecifier = `./${filename}$document-module.js`;
 
-    const {importMetaMemberExpressions} = scriptView;
+      for (const script of inlineModuleScripts) {
+        const index = externalizedModuleScriptSpecifiers.length;
+        const specifier = `./${filename}$inline-module-${index}.js`;
 
-    const importMetaScriptElementSelector =
-        `'script[data-inline-module-script="${index}"]'`;
-    dom.setAttribute(script, 'data-inline-module-script', `${index}`);
+        const scriptView =
+            ScriptView.fromSourceString(dom.getTextContent(script));
 
-    for (const memberExpression of importMetaMemberExpressions) {
-      const {node} = memberExpression;
-      const {property} = node;
+        const {importMetaMemberExpressions} = scriptView;
+        const importMetaScriptElementSelector =
+            `'script[data-inline-module-script="${index}"]'`;
+        dom.setAttribute(script, 'data-inline-module-script', `${index}`);
 
-      if (property.type === 'Identifier') {
-        memberExpression.replaceWith(ast`($documentModule.querySelector(${
-            importMetaScriptElementSelector}))`);
-      }
-    }
+        for (const memberExpression of importMetaMemberExpressions) {
+          const {node} = memberExpression;
+          const {property} = node;
 
-    const source = `import $documentModule from '${documentModuleSpecifier}';
+          if (property.type === 'Identifier') {
+            memberExpression.replaceWith(ast`($documentModule.querySelector(${
+                importMetaScriptElementSelector}))`);
+          }
+        }
+
+        const source =
+            `import $documentModule from '${documentModuleSpecifier}';
 ${scriptView.toString()}`;
 
-    newFiles.push(new File({
-      path: nodePath.join(nodePath.dirname(file.path), specifier),
-      contents: Buffer.from(source),
-      cwd: file.cwd,
-      base: file.base
-    }));
-    externalizedModuleScriptSpecifiers.push(specifier);
-  }
+        fileMap.set(nodePath.join(directory, specifier), source);
+        externalizedModuleScriptSpecifiers.push(specifier);
+      }
 
-  const documentModuleFile = new File({
-    path: nodePath.join(nodePath.dirname(file.path), documentModuleSpecifier),
-    contents: Buffer.from(`
+      const documentModuleSource = `
 const template = document.createElement('template');
 const doc = document.implementation.createHTMLDocument();
 
 template.innerHTML = \`${
-        documentView.toString().replace(/(^|[^\\]*)\`/g, '$1\\`')}\`;
+          documentView.toString().replace(/(^|[^\\]*)\`/g, '$1\\`')}\`;
 
 doc.body.appendChild(template.content);
 
-export default doc;`),
-    cwd: file.cwd,
-    base: file.base
-  });
+export default doc;`;
 
-  newFiles.push(documentModuleFile);
+      fileMap.set(
+          nodePath.join(directory, documentModuleSpecifier),
+          documentModuleSource);
 
-  const scriptUrls =
-      externalModuleScripts.map(script => dom.getAttribute(script, 'src'))
-          .concat(externalizedModuleScriptSpecifiers);
+      const scriptUrls =
+          externalModuleScripts.map(script => dom.getAttribute(script, 'src'))
+              .concat(externalizedModuleScriptSpecifiers);
 
-  file.path = `${file.path}.js`;
-  file.contents = Buffer.from(`
+      const entrypointModuleSource = `
 import doc from '${documentModuleSpecifier}';
 ${
-      scriptUrls
-          .map((url, index) => `import * as module${index} from '${url}';`)
-          .join('\n')}
+          scriptUrls
+              .map((url, index) => `import * as module${index} from '${url}';`)
+              .join('\n')}
 
 const modules = [${
-      scriptUrls.map((_url, index) => `module${index}`).join(', ')}];
+          scriptUrls.map((_url, index) => `module${index}`).join(', ')}];
 
 const scripts = doc.querySelectorAll('script[type="module"]');
 
@@ -119,7 +115,25 @@ for (let i = 0; i < modules.length; ++i) {
   scripts[i].module = modules[i];
 }
 
-export default doc;`);
+export default doc;`
 
-  return newFiles;
+      fileMap.set(`${path}.js`, entrypointModuleSource);
+
+      return fileMap;
+    }
+
+export const htmlModuleFileToJsModuleFiles =
+    async(file: File): Promise<File[]> => {
+  const moduleMap =
+      await htmlModuleToJsModuleMap(file.path, await getFileContents(file));
+  const files: File[] = [];
+  for (const [path, contents] of moduleMap.entries()) {
+    files.push(new File({
+      path,
+      contents: Buffer.from(contents),
+      cwd: file.cwd,
+      base: file.base
+    }));
+  }
+  return files;
 };
