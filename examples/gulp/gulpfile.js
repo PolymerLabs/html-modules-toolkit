@@ -11,7 +11,7 @@ gulp.task('transform-html-modules', function() {
       .on('error', error => console.log(error))
       .pipe(htmlModuleSpecifierTransform())
       .on('error', error => console.log(error))
-      .pipe(gulp.dest('./dest'))
+      .pipe(gulp.dest('./dist'))
       .on('error', error => console.log(error));
 });
 
