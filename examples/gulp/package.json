@@ -1,0 +1,12 @@
+{
+  "name": "html-modules-gulp-example",
+  "version": "0.0.1",
+  "description": "An example project using HTML Modules transforms with Gulp",
+  "scripts": {},
+  "author": "The Polymer Authors",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-cli": "^2.0.1"
+  }
+}
