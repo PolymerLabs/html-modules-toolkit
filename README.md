@@ -65,10 +65,26 @@ import {transformSpecifiersInHtmlString,transformSpecifiersInJsString} from
 This project also includes higher-level wrappers of the transform for different
 practical use cases. The available wrappers include:
 
- - Webpack plugin: `import {HtmlModulesPlugin} from '@polymer/html-modules-toolkit/lib/html-module-transform/webpack-plugin';`
- - Gulp-compatible vinyl-fs transforms: `import {HtmlModuleTransform,HtmlModuleSpecifiersTransform} from '@polymer/html-modules-toolkit/lib/vinyl-transform';`
- - Express middleware: `import {htmlModulesMiddleware} from '@polymer/html-modules-toolkit/lib/express-middleware'`;
- - Koa middleware: `import {htmlModulesMiddleware} from '@polymer/html-modules-toolkit/lib/koa-middleware'`;
+ - **Webpack plugin:**
+   ```javascript
+   import {HtmlModulesPlugin} from
+       '@polymer/html-modules-toolkit/lib/html-module-transform/webpack-plugin';
+   ```
+ - **Gulp-compatible vinyl-fs transforms:** 
+   ```javascript
+   import {HtmlModuleTransform,HtmlModuleSpecifiersTransform} from
+       '@polymer/html-modules-toolkit/lib/vinyl-transform';
+   ```
+ - **Express middleware:** 
+   ```javascript
+   import {htmlModulesMiddleware} from
+       '@polymer/html-modules-toolkit/lib/express-middleware';
+   ```
+ - **Koa middleware:**
+   ```javascript
+   import {htmlModulesMiddleware} from
+       '@polymer/html-modules-toolkit/lib/koa-middleware';
+   ```
 
 ### Specifier transforms
 
