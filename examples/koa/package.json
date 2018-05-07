@@ -1,0 +1,12 @@
+{
+  "name": "html-modules-koa-example",
+  "version": "0.0.1",
+  "description": "An example project using HTML Modules transforms with Koa",
+  "scripts": {},
+  "author": "The Polymer Authors",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "koa": "^2.5.1",
+    "koa-static": "^4.0.2"
+  }
+}

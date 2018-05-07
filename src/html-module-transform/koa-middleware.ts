@@ -16,33 +16,42 @@ import {Context, Middleware} from 'koa';
 import * as File from 'vinyl';
 
 import {SyntheticFileMap} from '../file.js';
-import {htmlModuleTransform} from '../html-module-transform.js';
 
-export const htmlModulesMiddleware = (root: string = './'): Middleware => {
-  const syntheticFileMap =
-      new SyntheticFileMap(root, () => htmlModuleTransform());
+import {defaultHtmlModuleTest, HtmlModuleTest, htmlModuleTransform} from './vinyl-transform.js';
 
-  return async (ctx: Context, next: Function) => {
-    const {request, response} = ctx;
-    const {path} = request;
-    const hasFile = await syntheticFileMap.hasFile(path);
+const isJsMimeTypeRe = /.*\.js/;
 
-    if (!hasFile) {
-      return next();
-    }
+export const htmlModulesMiddleware =
+    (root: string = './', moduleTest: HtmlModuleTest = defaultHtmlModuleTest):
+        Middleware => {
+          const syntheticFileMap =
+              new SyntheticFileMap(root, () => htmlModuleTransform(moduleTest));
 
-    let file: File;
+          return async (ctx: Context, next: Function) => {
+            const {request, response} = ctx;
+            const {path} = request;
+            const hasFile = await syntheticFileMap.hasFile(path);
 
-    try {
-      file = await syntheticFileMap.readFile(path);
-    } catch (e) {
-      return next();
-    }
+            if (!hasFile) {
+              return next();
+            }
 
-    response.set('Content-Type', 'text/javascript');
-    response.set('Cache-Control', 'no-store');
-    response.body = file.contents;
+            let file: File;
 
-    next();
-  };
-};
+            try {
+              file = await syntheticFileMap.readFile(path);
+            } catch (e) {
+              console.error(e);
+              return next();
+            }
+
+
+            if (isJsMimeTypeRe.test(file.path)) {
+              response.set('Content-Type', 'text/javascript');
+              response.set('Cache-Control', 'no-store');
+              response.body = file.contents;
+            } else {
+              return next();
+            }
+          };
+        };

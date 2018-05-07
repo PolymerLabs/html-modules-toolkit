@@ -14,46 +14,33 @@
 
 import * as dom from 'dom5';
 import * as nodePath from 'path';
-import {Transform} from 'stream';
-import * as File from 'vinyl';
 import template from '@babel/template';
 
 import {DocumentView} from './document-view.js';
 import {ScriptView} from './script-view.js';
-import {destructureStream} from './stream.js';
 
 const {ast} = template;
 
-export type HtmlModuleFileTest = (file: File) => Boolean;
+export type JsModuleMap = Map<string, string>;
 
-export const defaultHtmlModuleTest: HtmlModuleFileTest = (file: File) =>
-    /\.html$/.test(file.path) && !/index\.html$/.test(file.path);
-
-export const htmlModuleTransform =
-    (htmlModuleTest: HtmlModuleFileTest = defaultHtmlModuleTest): Transform =>
-        destructureStream<File>(
-            async(file: File): Promise<File[]> => htmlModuleTest(file) ?
-                await htmlModuleFileToJsModuleFiles(file) :
-                [file]);
-
-export const htmlModuleFileToJsModuleFiles =
-    async(file: File): Promise<File[]> => {
-  const documentView = await DocumentView.fromFile(file);
+export const htmlModuleToJsModuleMap =
+    async(path: string, source: string): Promise<JsModuleMap> => {
+  const documentView = await DocumentView.fromSourceString(source);
   const {inlineModuleScripts, externalModuleScripts} = documentView;
   const externalizedModuleScriptSpecifiers: string[] = [];
-  const newFiles: File[] = [file];
-  const documentModuleSpecifier =
-      `./${nodePath.basename(file.path)}$document-module.js`;
+  const fileMap = new Map<string, string>();
+  const filename = nodePath.basename(path);
+  const directory = nodePath.dirname(path);
+
+  const documentModuleSpecifier = `./${filename}$document-module.js`;
 
   for (const script of inlineModuleScripts) {
     const index = externalizedModuleScriptSpecifiers.length;
-    const specifier =
-        `./${nodePath.basename(file.path)}$inline-module-${index}.js`;
+    const specifier = `./${filename}$inline-module-${index}.js`;
 
     const scriptView = ScriptView.fromSourceString(dom.getTextContent(script));
 
     const {importMetaMemberExpressions} = scriptView;
-
     const importMetaScriptElementSelector =
         `'script[data-inline-module-script="${index}"]'`;
     dom.setAttribute(script, 'data-inline-module-script', `${index}`);
@@ -71,39 +58,29 @@ export const htmlModuleFileToJsModuleFiles =
     const source = `import $documentModule from '${documentModuleSpecifier}';
 ${scriptView.toString()}`;
 
-    newFiles.push(new File({
-      path: nodePath.join(nodePath.dirname(file.path), specifier),
-      contents: Buffer.from(source),
-      cwd: file.cwd,
-      base: file.base
-    }));
+    fileMap.set(nodePath.join(directory, specifier), source);
     externalizedModuleScriptSpecifiers.push(specifier);
   }
 
-  const documentModuleFile = new File({
-    path: nodePath.join(nodePath.dirname(file.path), documentModuleSpecifier),
-    contents: Buffer.from(`
+  const documentModuleSource = `
 const template = document.createElement('template');
 const doc = document.implementation.createHTMLDocument();
 
 template.innerHTML = \`${
-        documentView.toString().replace(/(^|[^\\]*)\`/g, '$1\\`')}\`;
+      documentView.toString().replace(/(^|[^\\]*)\`/g, '$1\\`')}\`;
 
 doc.body.appendChild(template.content);
 
-export default doc;`),
-    cwd: file.cwd,
-    base: file.base
-  });
+export default doc;`;
 
-  newFiles.push(documentModuleFile);
+  fileMap.set(
+      nodePath.join(directory, documentModuleSpecifier), documentModuleSource);
 
   const scriptUrls =
       externalModuleScripts.map(script => dom.getAttribute(script, 'src'))
           .concat(externalizedModuleScriptSpecifiers);
 
-  file.path = `${file.path}.js`;
-  file.contents = Buffer.from(`
+  const entrypointModuleSource = `
 import doc from '${documentModuleSpecifier}';
 ${
       scriptUrls
@@ -119,7 +96,9 @@ for (let i = 0; i < modules.length; ++i) {
   scripts[i].module = modules[i];
 }
 
-export default doc;`);
+export default doc;`
 
-  return newFiles;
+  fileMap.set(`${path}.js`, entrypointModuleSource);
+
+  return fileMap;
 };
