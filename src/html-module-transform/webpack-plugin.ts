@@ -8,6 +8,7 @@ import {compilation, Compiler} from 'webpack';
 import {htmlModuleToJsModuleMap} from '../html-module-transform.js';
 
 const readFile = promisify(fs.readFile);
+const realpath = promisify(fs.realpath);
 const ufs = new Union();
 const vfs = new Volume();
 
@@ -50,7 +51,8 @@ export class HtmlModulesPlugin {
         this.htmlModuleTest(moduleFactoryOptions);
   }
 
-  getResourcePath(moduleFactoryOptions: WebpackModuleFactoryOptions): string {
+  async getResourcePath(moduleFactoryOptions: WebpackModuleFactoryOptions):
+      Promise<string> {
     const {context, request, contextInfo} = moduleFactoryOptions;
     const {issuer} = contextInfo;
 
@@ -61,7 +63,9 @@ export class HtmlModulesPlugin {
     const resourcePathInIssuerDirectory =
         join(issuerDirectory, requestWithoutLoaderOrQuery);
 
-    return join(context, resourcePathInIssuerDirectory);
+    // NOTE: If there is a symlink, Webpack will look up the real path to the
+    // symlinked file. So, we do that here:
+    return await realpath(join(context, resourcePathInIssuerDirectory));
   }
 
   apply(compiler: Compiler) {
@@ -93,7 +97,8 @@ export class HtmlModulesPlugin {
               // use name specifiers pointing into node_modules. With this
               // approach, we can only support local files referenced as path
               // specifiers:
-              const resourcePath = this.getResourcePath(moduleFactoryOptions);
+              const resourcePath =
+                  await this.getResourcePath(moduleFactoryOptions);
 
               const htmlContent = (await readResource(resourcePath)).toString();
               // Use the HTML Modules Transform to generate ESM entrypoint and

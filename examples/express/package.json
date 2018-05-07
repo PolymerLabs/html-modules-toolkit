@@ -1,0 +1,11 @@
+{
+  "name": "html-modules-express-example",
+  "version": "0.0.1",
+  "description": "An example project using HTML Modules transforms with Express",
+  "scripts": {},
+  "author": "The Polymer Authors",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}

@@ -63,7 +63,9 @@ export class ScriptView {
             },
             'ImportDeclaration|ExportAllDeclaration|ExportNamedDeclaration':
                 (path: NodePath<HasSpecifier>) => {
-                  this.specifierNodes.push(path);
+                  if (path.node.source != null) {
+                    this.specifierNodes.push(path);
+                  }
                 }
           }
         },
