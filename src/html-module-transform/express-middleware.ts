@@ -16,32 +16,38 @@ import {Request, RequestHandler, Response} from 'express';
 import * as File from 'vinyl';
 
 import {SyntheticFileMap} from '../file.js';
-import {htmlModuleTransform} from '../html-module-transform.js';
+import {defaultHtmlModuleTest, HtmlModuleTest, htmlModuleTransform} from './vinyl-transform.js';
 
-export const htmlModulesMiddleware = (root: string = './'): RequestHandler => {
-  const syntheticFileMap =
-      new SyntheticFileMap(root, () => htmlModuleTransform());
+const isJsMimeTypeRe = /.*\.js/;
 
-  return async (request: Request, response: Response, next: () => void) => {
-    const {path} = request;
-    const hasFile = await syntheticFileMap.hasFile(path);
+export const htmlModulesMiddleware =
+    (root: string = './',
+     moduleTest: HtmlModuleTest = defaultHtmlModuleTest): RequestHandler => {
+      const syntheticFileMap =
+          new SyntheticFileMap(root, () => htmlModuleTransform(moduleTest));
 
-    if (!hasFile) {
-      return next();
-    }
+      return async (request: Request, response: Response, next: () => void) => {
+        const {path} = request;
+        const hasFile = await syntheticFileMap.hasFile(path);
 
-    let file: File;
+        if (!hasFile) {
+          return next();
+        }
 
-    try {
-      console.log('Pulling out of file map...');
-      file = await syntheticFileMap.readFile(path);
-    } catch (e) {
-      console.error(e);
-      return next();
-    }
+        let file: File;
 
-    response.set('Content-Type', 'text/javascript');
-    response.set('Cache-Control', 'no-store');
-    response.send(file.contents);
-  };
-};
+        try {
+          file = await syntheticFileMap.readFile(path);
+        } catch (e) {
+          console.error(e);
+          return next();
+        }
+
+        if (isJsMimeTypeRe.test(file.path)) {
+          response.set('Content-Type', 'text/javascript');
+          response.set('Cache-Control', 'no-store');
+        }
+
+        response.send(file.contents.toString());
+      };
+    };

@@ -1,5 +1,5 @@
 {
-  "name": "hd-html",
+  "name": "@polymer/html-modules-toolkit",
   "version": "0.0.1",
   "description": "",
   "main": "lib/index.js",
@@ -42,7 +42,6 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "devDependencies": {
-    "koa-static": "^4.0.2",
     "typescript": "^2.7.2"
   }
 }

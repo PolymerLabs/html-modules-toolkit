@@ -15,13 +15,16 @@
 const Koa = require('koa');
 const static = require('koa-static');
 
-const { htmlModulesMiddleware } =
-    require('../lib/html-module-transform/koa-middleware.js');
+const {htmlModulesMiddleware} =
+    require('../../lib/html-module-transform/koa-middleware.js');
 
 const root = './src';
 const app = new Koa();
 
-app.use(htmlModulesMiddleware(root));
+app.use(htmlModulesMiddleware(root, filePath => {
+  return /\.html$/.test(filePath) && !/(index|about)\.html$/.test(filePath);
+}));
 app.use(static(root));
 
 app.listen(3000);
+console.log('Listening on port 3000...');
