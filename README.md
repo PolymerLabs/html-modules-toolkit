@@ -43,18 +43,51 @@ solidify.
 ## Installing
 
 ```sh
-npm install hd-html
+npm install @polymer/html-modules-toolkit
 ```
+
+## What is included
+
+This project includes low-level, versatile string-to-string transforms that can
+analyze a file in place, and produce the appropriate ES Module-compatible
+output.
+
+You can import these low-level transforms into your Node.js build pipeline or
+dev server of choice:
+
+```javascript
+import {htmlModuleToJsModuleMap} from
+    '@polymer/html-modules-toolkit/lib/html-module-transform';
+import {transformSpecifiersInHtmlString,transformSpecifiersInJsString} from
+    '@polymer/html-modules-toolkit/lib/html-module-specifier-transform';
+```
+
+This project also includes higher-level wrappers of the transform for different
+practical use cases. The available wrappers include:
+
+ - Webpack plugin: `import {HtmlModulesPlugin} from '@polymer/html-modules-toolkit/lib/html-module-transform/webpack-plugin';`
+ - Gulp-compatible vinyl-fs transforms: `import {HtmlModuleTransform,HtmlModuleSpecifiersTransform} from '@polymer/html-modules-toolkit/lib/vinyl-transform';`
+ - Express middleware: `import {htmlModulesMiddleware} from '@polymer/html-modules-toolkit/lib/express-middleware'`;
+ - Koa middleware: `import {htmlModulesMiddleware} from '@polymer/html-modules-toolkit/lib/koa-middleware'`;
+
+### Specifier transforms
+
+If you look closely at the above import statements, you will notice that in some
+cases there are separate transforms offered for converting specifiers. This
+transform is offered separately because it is not always needed. For example, in
+a dev server the server can control the `Content-Type` of the file being sent,
+and can send `text/javascript` even if the file has a `.html` file extension.
 
 ## Usage examples
 
 You can find some concrete usage examples in the
-[`test/`](https://github.com/PolymerLabs/hd-html/tree/master/test) directory
+[`examples/`](https://github.com/PolymerLabs/html-modules-toolkit/tree/master/examples) directory
 of this project. The examples include:
 
- - [An Express dev server](https://github.com/PolymerLabs/hd-html/blob/master/test/serve-express.js)
- - [A Koa dev server](https://github.com/PolymerLabs/hd-html/blob/master/test/serve-koa.js)
- - [A vinyl-fs (Gulp) static build pipeline](https://github.com/PolymerLabs/hd-html/blob/master/test/build.js)
+ - [An Express dev server](https://github.com/PolymerLabs/html-modules-toolkit/blob/master/examples/express)
+ - [A Koa dev server](https://github.com/PolymerLabs/html-modules-toolkit/blob/master/examples/koa)
+ - [A Gulp (vinyl-fs) build pipeline](https://github.com/PolymerLabs/html-modules-toolkit/blob/master/examples/gulp)
+ - [A Webpack build pipeline](https://github.com/PolymerLabs/html-modules-toolkit/blob/master/examples/webpack)
 
 Additionally, you can find a live example of the Koa middleware in action on
 [Glitch](https://glitch.com/edit/#!/html-modules).
