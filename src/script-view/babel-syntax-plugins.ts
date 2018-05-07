@@ -12,14 +12,9 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-const express = require('express');
-const { htmlModulesMiddleware } =
-    require('../lib/html-module-transform/express-middleware.js');
-
-const root = './src';
-const app = express();
-
-app.use(htmlModulesMiddleware(root));
-app.use(express.static(root));
-
-app.listen(3000);
+export const babelSyntaxPlugins = [
+  require('@babel/plugin-syntax-async-generators'),
+  require('@babel/plugin-syntax-dynamic-import'),
+  require('@babel/plugin-syntax-import-meta'),
+  require('@babel/plugin-syntax-object-rest-spread')
+];

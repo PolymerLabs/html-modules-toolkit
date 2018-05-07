@@ -13,46 +13,9 @@
  */
 
 import * as dom from 'dom5';
-import {Transform} from 'stream';
-import * as File from 'vinyl';
 
 import {DocumentView} from './document-view.js';
-import {getFileContents} from './file.js';
 import {ScriptView} from './script-view.js';
-import {transformStream} from './stream.js';
-
-
-export const htmlModuleSpecifierTransform = (): Transform =>
-    transformStream<File, File>(async(file: File): Promise<File> => {
-      if (/.html$/.test(file.path)) {
-        return await transformSpecifiersInHtmlFile(file);
-      } else if (/.js$/.test(file.path)) {
-        return await transformSpecifiersInJsFile(file);
-      }
-
-      return file;
-    });
-
-
-export const transformSpecifiersInHtmlFile =
-    async(file: File): Promise<File> => {
-  const htmlString =
-      transformSpecifiersInHtmlString(await getFileContents(file));
-
-  file.contents = Buffer.from(htmlString);
-
-  return file;
-};
-
-
-export const transformSpecifiersInJsFile = async(file: File): Promise<File> => {
-  const jsString = transformSpecifiersInJsString(await getFileContents(file));
-
-  file.contents = Buffer.from(jsString);
-
-  return file;
-};
-
 
 export const transformSpecifiersInHtmlString = (htmlString: string): string => {
   const documentView = DocumentView.fromSourceString(htmlString);
@@ -73,18 +36,19 @@ export const transformSpecifiersInHtmlString = (htmlString: string): string => {
 
   return documentView.toString();
 };
-;
 
 
 export const transformSpecifiersInJsString = (jsString: string): string => {
   const scriptView = ScriptView.fromSourceString(jsString);
-  const {importDeclarations} = scriptView;
+  const {specifierNodes} = scriptView;
 
-  for (const declaration of importDeclarations) {
-    const {source} = declaration;
-    if (/.html$/.test(source.value)) {
+  for (const specifier of specifierNodes) {
+    const {node} = specifier;
+    const {source} = node as any;
+    const {value} = source;
+
+    if (/.html$/.test(value)) {
       source.value = source.value.replace(/\.html$/, '.html.js');
-      source.raw = source.raw.replace(/\.html$/, '.html.js');
     }
   }
 

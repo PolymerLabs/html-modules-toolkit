@@ -1,0 +1,13 @@
+{
+  "name": "html-modules-webpack-example",
+  "version": "0.0.1",
+  "description": "An example project using HTML Modules transforms with Webpack",
+  "scripts": {},
+  "author": "The Polymer Authors",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "webpack": "^4.6.0",
+    "webpack-cli": "^2.1.2",
+    "html-webpack-plugin": "^3.2.0"
+  }
+}
