@@ -1,3 +1,6 @@
+*🚨**PROJECT STATUS: EXPERIMENTAL** 🚨This product is in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk.*
+
+
 # 🍢 HTML Modules Toolkit
 
 Let's face it: if you publish stuff on the web, you probably noticed that
