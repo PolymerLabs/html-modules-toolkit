@@ -1,4 +1,4 @@
-*🚨**PROJECT STATUS: EXPERIMENTAL** 🚨This product is in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk.*
+*🚨 **PROJECT STATUS: EXPERIMENTAL** 🚨This product is in the Experimentation phase. Someone on the team thinks it’s an idea worth exploring, but it may not go any further than this. Use at your own risk.*
 
 
 # 🍢 HTML Modules Toolkit
