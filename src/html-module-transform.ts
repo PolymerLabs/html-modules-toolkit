@@ -51,7 +51,7 @@ export const htmlModuleToJsModuleMap =
 
       if (property.type === 'Identifier') {
         memberExpression.replaceWith(ast`($documentModule.querySelector(${
-            importMetaScriptElementSelector}))`);
+            importMetaScriptElementSelector}).parentElement)`);
       }
     }
 
