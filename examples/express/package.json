@@ -6,6 +6,6 @@
   "author": "The Polymer Authors",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "express": "^4.16.3"
+    "express": "^4.19.2"
   }
 }
