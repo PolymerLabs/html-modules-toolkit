@@ -6,7 +6,7 @@
   "author": "The Polymer Authors",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "koa": "^2.5.1",
+    "koa": "^3.1.2",
     "koa-static": "^4.0.2"
   }
 }
