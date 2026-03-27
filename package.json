@@ -38,7 +38,7 @@
     "parse5": "^4.0.0",
     "through2": "^2.0.3",
     "unionfs": "^3.0.2",
-    "vinyl-fs": "^3.0.2",
+    "vinyl-fs": "^4.0.2",
     "vinyl-source-stream": "^2.0.0"
   },
   "devDependencies": {
