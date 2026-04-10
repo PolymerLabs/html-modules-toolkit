@@ -6,7 +6,7 @@
   "author": "The Polymer Authors",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^5.0.1",
     "gulp-cli": "^2.0.1"
   }
 }
